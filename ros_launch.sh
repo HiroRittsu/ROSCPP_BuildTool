@@ -17,6 +17,7 @@ last() {
 	kill `ps aux | grep "freenect_launch" | grep -v "gnome-terminal" | awk '{print $2}'` &>/dev/null
 	kill `ps aux | grep "joy" | grep -v "gnome-terminal" | awk '{print $2}'` &>/dev/null
 	kill `ps aux | grep "bringup" | grep -v "gnome-terminal" | awk '{print $2}'` &>/dev/null
+	kill `ps aux | grep "emergency_stop" | grep -v "gnome-terminal" | awk '{print $2}'` &>/dev/null
 
 	exit 1
 }
@@ -64,7 +65,7 @@ echo
 
 if [ -z $1 ] || [ $1 -ne 0 ]; then
 
-	catkin_make 2> $LOG
+	catkin_make -DCMAKE_BUILD_TYPE=Debug  2> $LOG
 
 fi
 
@@ -193,7 +194,13 @@ if [ `ps aux | grep "roscore" | grep -v -c "grep"` -eq 0 ] && [ `ps aux | grep "
 	sleep 5
 fi
 
+gnome-terminal -x  bash -c "
 
+		echo 'emergency node'
+
+		roslaunch emergency_stop emergency.launch
+
+" &
 
 for i in ${numberlist[@]}
 do
@@ -304,6 +311,8 @@ do
 			echo "$package/$src"
 
 			rosrun $package $src
+			
+			sleep 10
 
 		" &
 
